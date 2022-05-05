@@ -5,7 +5,7 @@ Taking a stab at the problems in the [Ray Tracer Challenge](http://raytracerchal
 ```
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug ..
 make all
 ./bin/rtc_project
 ./bin/rtc_project_tests

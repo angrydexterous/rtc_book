@@ -12,4 +12,4 @@ const float GROUP_INFINITE_BIGNUM = 10e6;
 
 inline bool epsilon_eq(float a, float b) { return abs(a - b) < EPSILON; };
 
-#endif    // RTC_PRIMITIVES_MATH_H_
+#endif // RTC_PRIMITIVES_MATH_H_

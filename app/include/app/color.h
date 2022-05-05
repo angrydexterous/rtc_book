@@ -4,59 +4,60 @@
 #include <array>
 #include <concepts>
 #include <cmath>
+#include <Eigen/Dense>
 #include "math.h"
 #include "types.h"
 
-template <typename T>
-requires std::floating_point<T>
-class __attribute__ ((packed)) Color
+namespace Color
 {
-    T r_, g_, b_;
+  using Eigen::Matrix;
 
-public:
+  template <typename T>
+  requires std::floating_point<T>
+  class Color
+  {
+    Matrix<T, 3, 1> rgb_;
+
+  public:
     Color(T r, T g, T b)
     {
-        r_ = r;
-        g_ = g;
-        b_ = b;
+      rgb_ = Matrix<T, 3, 1>(r, g, b);
     }
+
+    Color(Matrix<T, 3, 1> &&fromMatrix) : rgb_{std::move(fromMatrix)} {};
     Color(){};
 
-    T r() const { return r_; }
-    T g() const { return g_; }
-    T b() const { return b_; }
-};
+    T r() const { return rgb_[0]; }
+    T g() const { return rgb_[1]; }
+    T b() const { return rgb_[2]; }
 
-template <typename T>
-bool operator==(const Color<T> lhs, const Color<T> rhs)
-{
-    return epsilon_eq(lhs.r(), rhs.r()) &&
-           epsilon_eq(lhs.g(), rhs.g()) &&
-           epsilon_eq(lhs.b(), rhs.b());
-}
+    bool operator==(const Color<T> rhs) const
+    {
+      return rgb_.isApprox(std::move(rhs.rgb_), EPSILON);
+    }
 
-template <typename T>
-auto operator+(const Color<T> lhs, const Color<T> rhs)
-{
-    return Color(lhs.r() + rhs.r(), lhs.g() + rhs.g(), lhs.b() + rhs.b());
-}
+    auto operator+(const Color<T> rhs) const
+    {
+      return Color(rgb_ + rhs.rgb_);
+    }
 
-template <typename T>
-auto operator-(const Color<T> lhs, const Color<T> rhs)
-{
-    return Color(lhs.r() - rhs.r(), lhs.g() - rhs.g(), lhs.b() - rhs.b());
-}
+    auto operator-(const Color<T> rhs) const
+    {
+      return Color(rgb_ - rhs.rgb_);
+    }
 
-template <typename T, typename U>
-requires Number<U>
-auto operator*(const Color<T> c, U s)
-{
-    return Color(c.r() * s, c.g() * s, c.b() * s);
-}
+    template <typename U>
+    requires Number<U>
+    auto operator*(U s) const
+    {
+      return Color(rgb_ * s);
+    }
 
-template <typename T>
-auto operator*(const Color<T> lhs, const Color<T> rhs)
-{
-    return Color(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b());
+    auto operator*(const Color<T> rhs) const
+    {
+      Matrix<T, 3, 1> res = rgb_.array() * rhs.rgb_.array();
+      return Color(std::move(res));
+    }
+  };
 }
 #endif // COLOR_H

@@ -1,11 +1,10 @@
 # Add Deps Here
-find_package(spdlog)
+find_package(spdlog CONFIG)
 find_package(fmt REQUIRED)
 find_package(imgui CONFIG)
 find_package(glfw3 CONFIG)
 find_package(glew CONFIG)
-find_package(OpenMP REQUIRED)
-
+find_package(Eigen3 REQUIRED CONFIG)
 
 set(app_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -17,14 +16,22 @@ endif()
 set(SOURCE_FILES_AS_LIBS src/canvas.cpp
 )
 
+# SETUP LIBRARIES FOR LINK
+set(TARGET_LIBS spdlog::spdlog
+                fmt::fmt 
+                imgui::imgui         
+                glfw
+                GLEW::glew_s
+                GTest::gtest_main
+                Eigen3::Eigen
+)
+
+
 add_library(rtc_project_as_lib ${SOURCE_FILES_AS_LIBS} ${INCLUDE_FILES})
 target_include_directories(rtc_project_as_lib PRIVATE
         include
-        ${spdlog_INCLUDE_DIR}
         )
-target_link_libraries(rtc_project_as_lib spdlog::spdlog
-                                         OpenMP::OpenMP_CXX
-                                         )
+target_link_libraries(rtc_project_as_lib ${TARGET_LIBS})
 
 # MAIN EXECUTABLE
 set(SOURCE_FILES src/main.cpp
@@ -40,16 +47,8 @@ add_executable(rtc_project ${SOURCE_FILES} ${INCLUDE_FILES})
 
 target_include_directories(rtc_project PRIVATE
         include
-        ${spdlog_INCLUDE_DIR}
         )
 
-
 target_compile_definitions(rtc_project PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
-target_link_libraries(rtc_project rtc_project_as_lib
-                                  spdlog::spdlog
-                                  fmt::fmt 
-                                  imgui::imgui         
-                                  glfw
-                                  GLEW::glew_s
-                                  GTest::gtest_main)
+target_link_libraries(rtc_project rtc_project_as_lib ${TARGET_LIBS})
 
